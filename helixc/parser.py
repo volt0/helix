@@ -2,17 +2,24 @@ from typing import Iterator
 
 from ply import yacc
 
-from helixc.ast import Module, FunctionDeclaration, Argument, TypeSignature
+from helixc.ast import FunctionDeclaration, Argument, TypeSignature
 from helixc.lexer import Token, tokens
 
 tokens = tokens
 
 
-def p_module(p):
+def p_translation_unit(p):
     """
-    module : declarations_list EOF
+    translation_unit : declarations_list EOF
     """
-    p[0] = Module(p[1])
+    p[0] = p[1]
+
+
+def p_declarations_list_empty(p):
+    """
+    declarations_list :
+    """
+    p[0] = []
 
 
 def p_declarations_list_1(p):
@@ -75,36 +82,51 @@ def p_arglist_2(p):
 
 def p_argument(p):
     """
-    argument : ID
+    argument : ID COLON type_signature
     """
-    p[0] = Argument(p[1].decode(), None)
+    p[0] = Argument(p[1].decode(), p[3])
+
+
+def p_function_return_type_empty(p):
+    """
+    function_return_type :
+    """
+    p[0] = None
 
 
 def p_function_return_type(p):
     """
-    function_return_type : ARROW ID
+    function_return_type : COLON type_signature
     """
-    p[0] = TypeSignature(p[2].decode())
+    p[0] = p[2]
+
+
+def p_type_signature(p):
+    """
+    type_signature : ID
+    """
+    p[0] = TypeSignature(p[1].decode())
 
 
 def p_compound_stmt(p):
     """
     compound_stmt : LBRACE RBRACE
     """
-    p[0] = {}
+    p[0] = []
 
 
-# def p_error(p):
-#     raise SyntaxError(p)
+def p_error(p):
+    raise SyntaxError(p)
 
 
 class Parser(object):
     def __init__(self):
-        self.parser_impl = yacc.yacc(start='module')
+        self.parser_impl = yacc.yacc(start='translation_unit')
+        self.debug = False
 
     def parse(self, stream: Iterator[Token]):
         lexer_adaptor = LexerAdaptor(stream)
-        result = self.parser_impl.parse(lexer=lexer_adaptor, debug=False)
+        result = self.parser_impl.parse(lexer=lexer_adaptor, debug=self.debug)
         return result
 
 
@@ -114,11 +136,7 @@ class LexerAdaptor:
 
     def token(self):
         try:
-            token = next(self.stream)
-            # if self.debug:
-            #     print(token)
-            return token
-
+            return next(self.stream)
         except StopIteration:
             return None
 

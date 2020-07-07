@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Any
+from typing import Any, Optional, List
 
 
 @dataclass
@@ -21,10 +21,5 @@ class Declaration:
 @dataclass
 class FunctionDeclaration(Declaration):
     arguments: List[Argument]
-    return_type: TypeSignature
-    body: Any
-
-
-@dataclass
-class Module:
-    declarations: List[Declaration]
+    return_type: Optional[TypeSignature]
+    body: List[Any]
