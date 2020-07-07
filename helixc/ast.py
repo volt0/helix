@@ -1,10 +1,23 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import Optional, List
 
 
 @dataclass
 class TypeSignature:
     name: str
+
+
+class VariableMode(Enum):
+    let = 0
+    var = 1
+
+
+@dataclass
+class VariableSignature:
+    name: str
+    type: Optional[TypeSignature]
+    mode: VariableMode
 
 
 @dataclass
@@ -30,6 +43,12 @@ class BooleanLiteral(Expression):
 @dataclass
 class Stmt:
     pass
+
+
+@dataclass
+class VariableInitialization(Stmt):
+    variable: VariableSignature
+    value: Expression
 
 
 @dataclass

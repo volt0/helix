@@ -123,8 +123,77 @@ TEST_PARAMS_FUNCTIONS = [
 
 
 @pytest.mark.parametrize('stream,ref_ast', TEST_PARAMS_FUNCTIONS)
-def test_parser(stream, ref_ast, parser):
+def test_functions(stream, ref_ast, parser):
     assert parser.parse(iter(stream)) == ref_ast
+
+
+TEST_PARAMS_STMT = [
+    pytest.param(
+        [
+            # def f() {}
+            Token('LET'),
+            Token('ID', 'a'),
+            Token('ASSIGN'),
+            Token('INTEGER', 1),
+            Token('SEMI'),
+
+            Token('VAR'),
+            Token('ID', 'b'),
+            Token('ASSIGN'),
+            Token('INTEGER', 2),
+            Token('SEMI'),
+        ],
+        [
+            ast.VariableInitialization(
+                variable=ast.VariableSignature('a', type=None, mode=ast.VariableMode.let),
+                value=ast.IntegerLiteral(1)
+            ),
+            ast.VariableInitialization(
+                variable=ast.VariableSignature('b', type=None, mode=ast.VariableMode.var),
+                value=ast.IntegerLiteral(2)
+            ),
+        ],
+        id='let_and_var'
+    ),
+
+    pytest.param(
+        [
+            # def f() {}
+            Token('LET'),
+            Token('ID', 'a'),
+            Token('COLON'),
+            Token('ID', 'Int'),
+            Token('ASSIGN'),
+            Token('INTEGER', 0),
+            Token('SEMI'),
+        ],
+        [
+            ast.VariableInitialization(
+                variable=ast.VariableSignature('a', type=ast.TypeSignature(name='Int'), mode=ast.VariableMode.let),
+                value=ast.IntegerLiteral(0)
+            ),
+        ],
+        id='let_typed'
+    ),
+]
+
+
+@pytest.mark.parametrize('stream_part,ref_ast', TEST_PARAMS_STMT)
+def test_stmt(stream_part, ref_ast, parser):
+    stream = iter([
+        Token('DEF'),
+        Token('ID', 'f'),
+        Token('LPAREN'),
+        Token('RPAREN'),
+        Token('COLON'),
+        Token('ID', 'Int'),
+        Token('LBRACE'),
+        *stream_part,
+        Token('RBRACE'),
+        Token('EOF'),
+    ])
+    parse_result = parser.parse(stream)
+    assert parse_result[0].body == ref_ast
 
 
 @pytest.fixture

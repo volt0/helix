@@ -144,6 +144,48 @@ def p_stmtlist_n(p):
     p[0].append(p[2])
 
 
+def p_stmt_var(p):
+    """
+    stmt : variable_signature ASSIGN expr SEMI
+    """
+    p[0] = ast.VariableInitialization(p[1], p[3])
+
+
+def p_variable_signature(p):
+    """
+    variable_signature : variable_mode ID variable_type
+    """
+    p[0] = ast.VariableSignature(p[2], p[3], mode=p[1])
+
+
+def p_variable_mode_let(p):
+    """
+    variable_mode : LET
+    """
+    p[0] = ast.VariableMode.let
+
+
+def p_variable_mode_var(p):
+    """
+    variable_mode : VAR
+    """
+    p[0] = ast.VariableMode.var
+
+
+def p_variable_type_empty(p):
+    """
+    variable_type :
+    """
+    p[0] = None
+
+
+def p_variable_type(p):
+    """
+    variable_type : COLON type_signature
+    """
+    p[0] = p[2]
+
+
 def p_stmt_return_void(p):
     """
     stmt : RETURN SEMI
@@ -158,30 +200,37 @@ def p_stmt_return_expr(p):
     p[0] = ast.Return(p[2])
 
 
-def p_expr_integer_literal(p):
+def p_expr_constant(p):
     """
-    expr : INTEGER
+    expr : constant
+    """
+    p[0] = p[1]
+
+
+def p_constant_integer_literal(p):
+    """
+    constant : INTEGER
     """
     p[0] = ast.IntegerLiteral(p[1])
 
 
-def p_expr_float_literal(p):
+def p_constant_float_literal(p):
     """
-    expr : FLOAT
+    constant : FLOAT
     """
     p[0] = ast.FloatLiteral(p[1])
 
 
-def p_expr_true(p):
+def p_constant_true(p):
     """
-    expr : TRUE
+    constant : TRUE
     """
     p[0] = ast.BooleanLiteral(True)
 
 
-def p_expr_false(p):
+def p_constant_false(p):
     """
-    expr : FALSE
+    constant : FALSE
     """
     p[0] = ast.BooleanLiteral(False)
 

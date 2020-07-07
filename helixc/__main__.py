@@ -5,6 +5,8 @@ from helixc.parser import make_parser
 def main():
     sample_code = b'''
 def a(): Int {
+    var a: Int = 0;
+    let b = 1; 
     return 1;
 }
 '''

@@ -5,8 +5,8 @@ from ply import lex
 
 keywords = {
     'def': 'DEF',
-    # 'var': 'VAR',
-    # 'let': 'LET',
+    'var': 'VAR',
+    'let': 'LET',
     # 'if': 'IF',
     # 'else': 'ELSE',
     # 'while': 'WHILE',
@@ -23,7 +23,7 @@ tokens = (
     'INTEGER',
     'FLOAT',
     # 'STRING',
-    # 'ASSIGN',
+    'ASSIGN',
     # 'PLUS',
     # 'MINUS',
     # 'BANG',
@@ -54,7 +54,7 @@ tokens = (
     'EOF',
 )
 
-# t_ASSIGN = r'='
+t_ASSIGN = r'='
 # t_PLUS = r'\+'
 # t_MINUS = r'-'
 # t_MUL = r'\*'
