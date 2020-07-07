@@ -2,10 +2,17 @@ from typing import Iterator
 
 from ply import yacc
 
-from helixc.ast import FunctionDeclaration, Argument, TypeSignature
+from helixc import ast
 from helixc.lexer import Token, tokens
 
 tokens = tokens
+
+
+def p_translation_unit_empty(p):
+    """
+    translation_unit : EOF
+    """
+    p[0] = []
 
 
 def p_translation_unit(p):
@@ -15,13 +22,6 @@ def p_translation_unit(p):
     p[0] = p[1]
 
 
-def p_declarations_list_empty(p):
-    """
-    declarations_list :
-    """
-    p[0] = []
-
-
 def p_declarations_list_1(p):
     """
     declarations_list : declaration
@@ -29,7 +29,7 @@ def p_declarations_list_1(p):
     p[0] = [p[1]]
 
 
-def p_declarations_list_2(p):
+def p_declarations_list_n(p):
     """
     declarations_list : declarations_list declaration
     """
@@ -48,17 +48,17 @@ def p_function_declaration(p):
     """
     function_declaration : DEF ID arglist_declaration function_return_type compound_stmt
     """
-    p[0] = FunctionDeclaration(p[2].decode(), p[3], p[4], p[5])
+    p[0] = ast.FunctionDeclaration(p[2], p[3], p[4], p[5])
 
 
-def p_arglist_declaration_1(p):
+def p_arglist_declaration_empty(p):
     """
     arglist_declaration : LPAREN RPAREN
     """
     p[0] = []
 
 
-def p_arglist_declaration_2(p):
+def p_arglist_declaration(p):
     """
     arglist_declaration : LPAREN arglist RPAREN
     """
@@ -72,7 +72,7 @@ def p_arglist_1(p):
     p[0] = [p[1]]
 
 
-def p_arglist_2(p):
+def p_arglist_n(p):
     """
     arglist : arglist COMMA argument
     """
@@ -84,7 +84,7 @@ def p_argument(p):
     """
     argument : ID COLON type_signature
     """
-    p[0] = Argument(p[1].decode(), p[3])
+    p[0] = ast.Argument(p[1], p[3])
 
 
 def p_function_return_type_empty(p):
@@ -105,14 +105,85 @@ def p_type_signature(p):
     """
     type_signature : ID
     """
-    p[0] = TypeSignature(p[1].decode())
+    p[0] = ast.TypeSignature(p[1])
 
 
 def p_compound_stmt(p):
     """
-    compound_stmt : LBRACE RBRACE
+    compound_stmt : stmt_block
+    """
+    p[0] = p[1]
+
+
+def p_stmt_block_empty(p):
+    """
+    stmt_block : LBRACE RBRACE
     """
     p[0] = []
+
+
+def p_stmt_block(p):
+    """
+    stmt_block : LBRACE stmtlist RBRACE
+    """
+    p[0] = p[2]
+
+
+def p_stmtlist_1(p):
+    """
+    stmtlist : stmt
+    """
+    p[0] = [p[1]]
+
+
+def p_stmtlist_n(p):
+    """
+    stmtlist : stmtlist stmt
+    """
+    p[0] = p[1]
+    p[0].append(p[2])
+
+
+def p_stmt_return_void(p):
+    """
+    stmt : RETURN SEMI
+    """
+    p[0] = ast.ReturnVoid()
+
+
+def p_stmt_return_expr(p):
+    """
+    stmt : RETURN expr SEMI
+    """
+    p[0] = ast.Return(p[2])
+
+
+def p_expr_integer_literal(p):
+    """
+    expr : INTEGER
+    """
+    p[0] = ast.IntegerLiteral(p[1])
+
+
+def p_expr_float_literal(p):
+    """
+    expr : FLOAT
+    """
+    p[0] = ast.FloatLiteral(p[1])
+
+
+def p_expr_true(p):
+    """
+    expr : TRUE
+    """
+    p[0] = ast.BooleanLiteral(True)
+
+
+def p_expr_false(p):
+    """
+    expr : FALSE
+    """
+    p[0] = ast.BooleanLiteral(False)
 
 
 def p_error(p):

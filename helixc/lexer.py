@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Iterator
+from typing import Optional, Iterator, Any
 
 from ply import lex
 
@@ -11,17 +11,17 @@ keywords = {
     # 'else': 'ELSE',
     # 'while': 'WHILE',
     # 'for': 'FOR',
-    # 'return': 'RETURN',
-    # 'true': 'TRUE',
-    # 'false': 'FALSE',
+    'return': 'RETURN',
+    'true': 'TRUE',
+    'false': 'FALSE',
 }
 
 
 tokens = (
     *keywords.values(),
     'ID',
-    # 'INTEGER',
-    # 'FLOAT',
+    'INTEGER',
+    'FLOAT',
     # 'STRING',
     # 'ASSIGN',
     # 'PLUS',
@@ -46,7 +46,7 @@ tokens = (
     # 'EQ',
     'COMMA',
     'COLON',
-    # 'SEMI',
+    'SEMI',
     # 'ARROW',
     'LBRACE',
     'RBRACE',
@@ -77,7 +77,7 @@ t_RPAREN = r'\)'
 # t_TILDE = r'~'
 t_COMMA = r'\,'
 t_COLON = r':'
-# t_SEMI = r';'
+t_SEMI = r';'
 # t_ARROW = r'->'
 t_LBRACE = r'\{'
 t_RBRACE = r'\}'
@@ -95,13 +95,13 @@ def t_ID(t):
 
 def t_INTEGER(t):
     r"""\d+"""
-    t.value = int(t.value)
+    t.payload = int(t.value)
     return t
 
 
 def t_FLOAT(t):
     r"""((\d*\.\d+)([Ee][+-]?\d+)?|([1-9]\d*[Ee][+-]?\d+))"""
-    t.value = float(t.value)
+    t.payload = float(t.value)
     return t
 
 
@@ -130,15 +130,25 @@ def t_error(t):
 @dataclass
 class Token:
     type: str
-    text: Optional[bytes] = None
+    value: Optional[Any] = None
     line: int = 0
     column: int = 0
     position: int = 0
     len: int = 0
 
-    @property
-    def value(self):
-        return self.text
+    @classmethod
+    def from_lex(cls, token):
+        if hasattr(token, 'payload'):
+            value = token.payload
+        else:
+            value = token.value
+
+        return cls(
+            type=token.type,
+            value=value,
+            position=token.lexpos,
+            len=len(token.value)
+        )
 
 
 class Lexer:
@@ -150,15 +160,7 @@ class Lexer:
         self.lexer_impl.input(source.decode())
 
         for token in self.lexer_impl:
-            yield Token(
-                type=token.type,
-                text=token.value.encode(),
-                position=token.lexpos,
-                len=len(token.value)
-            )
-
-        # yield Token('EOF')
-        # yield Token('EOF', None, line_number, position - line_offset, position, 0)
+            yield Token.from_lex(token)
 
 
 def filter_add_eof(stream: Iterator[Token], eof_token_type: str = 'EOF'):

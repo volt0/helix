@@ -1,13 +1,14 @@
 import pytest
 
-from helixc.ast import FunctionDeclaration, TypeSignature, Argument
+from helixc import ast
 from helixc.lexer import Token
 
 TEST_PARAMS_FUNCTIONS = [
-    (
+    pytest.param(
         [
+            # def f() {}
             Token('DEF'),
-            Token('ID', text=b'a'),
+            Token('ID', 'f'),
             Token('LPAREN'),
             Token('RPAREN'),
             Token('LBRACE'),
@@ -15,47 +16,108 @@ TEST_PARAMS_FUNCTIONS = [
             Token('EOF'),
         ],
         [
-            FunctionDeclaration(
-                name='a',
+            ast.FunctionDeclaration(
+                name='f',
                 arguments=[],
                 return_type=None,
                 body=[]
             )
-        ]
+        ],
+        id='minimal_func'
     ),
-    (
+
+    pytest.param(
         [
+            # def f
             Token('DEF'),
-            Token('ID', b'a'),
+            Token('ID', 'f'),
+            # (arg1: Int, arg2: Int)
             Token('LPAREN'),
-
-            Token('ID', text=b'arg1'),
+            Token('ID', 'arg1'),
             Token('COLON'),
-            Token('ID', text=b'Int'),
+            Token('ID', 'Int'),
             Token('COMMA'),
-
-            Token('ID', text=b'arg2'),
+            Token('ID', 'arg2'),
             Token('COLON'),
-            Token('ID', text=b'Int'),
-
+            Token('ID', 'Int'),
             Token('RPAREN'),
+            # : Int
             Token('COLON'),
-            Token('ID', text=b'Int'),
+            Token('ID', 'Int'),
+            # {}
             Token('LBRACE'),
             Token('RBRACE'),
             Token('EOF'),
         ],
         [
-            FunctionDeclaration(
-                name='a',
+            ast.FunctionDeclaration(
+                name='f',
                 arguments=[
-                    Argument('arg1', type=TypeSignature(name='Int')),
-                    Argument('arg2', type=TypeSignature(name='Int')),
+                    ast.Argument('arg1', type=ast.TypeSignature(name='Int')),
+                    ast.Argument('arg2', type=ast.TypeSignature(name='Int')),
                 ],
-                return_type=TypeSignature(name='Int'),
+                return_type=ast.TypeSignature(name='Int'),
                 body=[]
             )
-        ]
+        ],
+        id='args'
+    ),
+
+    pytest.param(
+        [
+            # def f()
+            Token('DEF'),
+            Token('ID', 'f'),
+            Token('LPAREN'),
+            Token('RPAREN'),
+            Token('LBRACE'),
+            # return;
+            Token('RETURN'),
+            Token('SEMI'),
+            Token('RBRACE'),
+            Token('EOF'),
+        ],
+        [
+            ast.FunctionDeclaration(
+                name='f',
+                arguments=[],
+                return_type=None,
+                body=[
+                    ast.ReturnVoid()
+                ]
+            )
+        ],
+        id='return_void'
+    ),
+
+    pytest.param(
+        [
+            # def f(): Int
+            Token('DEF'),
+            Token('ID', 'f'),
+            Token('LPAREN'),
+            Token('RPAREN'),
+            Token('COLON'),
+            Token('ID', 'Int'),
+            Token('LBRACE'),
+            # return 99;
+            Token('RETURN'),
+            Token('INTEGER', 99),
+            Token('SEMI'),
+            Token('RBRACE'),
+            Token('EOF'),
+        ],
+        [
+            ast.FunctionDeclaration(
+                name='f',
+                arguments=[],
+                return_type=ast.TypeSignature(name='Int'),
+                body=[
+                    ast.Return(ast.IntegerLiteral(99))
+                ]
+            )
+        ],
+        id='return_value'
     ),
 ]
 
