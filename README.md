@@ -1,19 +1,60 @@
-Copyright (c) 2020, Anton Melnikov <anatolius.volt@gmail.com>  
-All rights reserved.
+# Helix
+__Attention!__
+This document is pre-draft and will be unstable until compiler becomes MVP status. 
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+## Syntax
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-- Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-- Neither the name of the <organization> nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+### Functions
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+Minimal function declaration:
+```
+def func1() {}
+```
+
+Function with arguments and return type:
+```
+def func2(a: Int, b: Int): Bool {
+    return false;
+}
+```
+If return type is not specified - its considered as void
+
+### Variables
+Two variable of type `Int`.
+First - immutable(initializes once, cannot be reassigned).
+Second - mutable.
+```
+let a: Int = 1;
+var b: Int = 2;
+
+a = 3; // Error: variable `a` is immutable
+b = 4; // Ok
+```
+
+## Data types
+
+Signed integers:
+
+| Bits | Signed  | Range                   |
+|------|---------|-------------------------|
+| 8    | `Byte`  | -128..127               |
+| 16   | `Short` | -32768..32767           |
+| 32   | `Int`   | -2147483648..2147483647 |
+| 64   | `Long`  | -9223372036854775808..  |
+|      |         | +9223372036854775807    |
+
+Unsigned integers:
+
+| Bits | Type    | Range                   | 
+|------|---------|-------------------------|
+| 8    | `UByte` | 0..255                  |
+| 16   | `UShort`| 0..65535                |
+| 32   | `UInt`  | 0..4294967295           |
+| 64   | `ULong` | 0..18446744073709551615 |
+
+Floating point:
+
+| Bits | Type     | Min/Max             | 
+|------|----------|---------------------|
+| 32   | `Float`  | 1.2e-38 / 3.4e+38   |
+| 64   | `Double` | 2.3e-308 / 1.7e+308 |
